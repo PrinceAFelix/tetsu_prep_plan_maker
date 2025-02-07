@@ -18,7 +18,6 @@ class BoxContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: boxWdith,
-      height: boxHeight,
       decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(20),
@@ -37,6 +36,9 @@ class BoxContainer extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
+            ),
+            SizedBox(
+              height: 35,
             ),
             child
           ],
