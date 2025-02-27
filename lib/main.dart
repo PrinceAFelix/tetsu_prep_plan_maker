@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tetsu_prep_plan_maker/screen/home_screen.dart';
 import 'package:tetsu_prep_plan_maker/screen/prep_plan_screen.dart';
 
 void main() {
@@ -15,7 +16,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: mainNavigatorKey,
       home: Scaffold(
-        body: PrepPlan(),
+        body: Home(),
       ),
     );
   }

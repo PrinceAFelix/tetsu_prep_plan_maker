@@ -65,6 +65,9 @@ class _CakeFormState extends State<CakeForm> {
       scController
     ];
 
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double inputWidth = screenWidth / 4 - 46;
+
     bool sbmtPress() {
       final isValid = _formkey.currentState!.validate();
       if (isValid) {
@@ -127,7 +130,7 @@ class _CakeFormState extends State<CakeForm> {
                       ),
                 SizedBox(height: 5),
                 SizedBox(
-                  width: 235,
+                  width: inputWidth,
                   height: 37,
                   child: TextFormField(
                     onChanged: (val) {
