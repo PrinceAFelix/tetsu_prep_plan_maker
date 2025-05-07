@@ -1,169 +1,216 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class CakeForm extends StatefulWidget {
-  const CakeForm({super.key, required this.formAction});
-
   final void Function(
     int oCake,
     int cCake,
     int mCake,
     int sCake,
+    int mads,
     Map<String, String>? specialCake,
     BuildContext ctx,
   ) formAction;
 
+  const CakeForm({
+    super.key,
+    required this.formAction,
+  });
+
   @override
-  State<CakeForm> createState() => _CakeFormState();
+  State<CakeForm> createState() => CakeFormState();
 }
 
-List<Map<String, String>> cakeList = [
-  {'Hojicha': 'hjCake'},
-  {'Very Berry': 'vbCake'},
-  {'Honey': 'hyCake'},
-  {'Yuzu': 'yzCake'},
-];
-
-class _CakeFormState extends State<CakeForm> {
-  final TextEditingController ogController = TextEditingController();
-  final TextEditingController ccController = TextEditingController();
-  final TextEditingController mcController = TextEditingController();
-  final TextEditingController scController = TextEditingController();
-
+class CakeFormState extends State<CakeForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _debounceDuration = const Duration(milliseconds: 500);
   Timer? _debounce;
-  final Duration _debounceDuration = Duration(milliseconds: 500);
 
-  final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+  // Controllers
+  final _ogController = TextEditingController();
+  final _ccController = TextEditingController();
+  final _mcController = TextEditingController();
+  final _scController = TextEditingController();
+  final _madsController = TextEditingController();
 
-  Map<String, String>? dropdownValue;
+  // Dropdown state
+  Map<String, String>? _selectedCake;
+
+  static const _cakeOptions = [
+    {'label': 'Original Cake', 'key': 'oCake'},
+    {'label': 'Chocolate Cake', 'key': 'cCake'},
+    {'label': 'Matcha Cake', 'key': 'mCake'},
+  ];
+
+  static const _specialCakes = [
+    {'Hojicha': 'hjCake'},
+    {'Very Berry': 'vbCake'},
+    {'Honey': 'hyCake'},
+    {'Yuzu': 'yzCake'},
+  ];
 
   @override
   void dispose() {
-    ogController.dispose();
-    ccController.dispose();
-    mcController.dispose();
-    scController.dispose();
+    _ogController.dispose();
+    _ccController.dispose();
+    _mcController.dispose();
+    _scController.dispose();
+    _madsController.dispose();
     _debounce?.cancel();
     super.dispose();
   }
 
+  void _handleSubmission() {
+    if (!_formKey.currentState!.validate()) return;
+
+    _formKey.currentState!.save();
+    widget.formAction(
+      _parseInput(_ogController.text),
+      _parseInput(_ccController.text),
+      _parseInput(_mcController.text),
+      _parseInput(_scController.text),
+      _parseInput(_madsController.text),
+      _selectedCake,
+      context,
+    );
+  }
+
+  int _parseInput(String value) => int.tryParse(value.trim()) ?? 0;
+
+  void resetFields() {
+    setState(() {
+      _ogController.clear();
+      _ccController.clear();
+      _mcController.clear();
+      _scController.clear();
+      _madsController.clear();
+      _selectedCake = null;
+    });
+    _handleSubmission();
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 16)),
+        const SizedBox(height: 5),
+        SizedBox(
+          width: MediaQuery.of(context).size.width / 4 - 46,
+          height: 37,
+          child: TextFormField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: _inputDecoration,
+            onChanged: (value) => _debounceHandler(value, controller),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSpecialCakeDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButton<Map<String, String>>(
+          value: _selectedCake,
+          isDense: true,
+          icon: const Icon(Icons.arrow_drop_down),
+          elevation: 16,
+          underline: _selectedCake == null
+              ? Container(height: 2, color: Colors.deepPurpleAccent)
+              : null,
+          style: const TextStyle(color: Color(0xFF000000)),
+          onChanged: (value) => setState(() {
+            _selectedCake = value;
+            _handleSubmission();
+          }),
+          items: _specialCakes
+              .map<DropdownMenuItem<Map<String, String>>>(
+                  (cake) => DropdownMenuItem(
+                        value: cake,
+                        child: Text(cake.keys.first),
+                      ))
+              .toList(),
+        ),
+        const SizedBox(height: 5),
+        SizedBox(
+          width: MediaQuery.of(context).size.width / 4 - 46,
+          height: 37,
+          child: TextFormField(
+            controller: _scController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: _inputDecoration,
+            onChanged: (value) => _debounceHandler(value, _scController),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _debounceHandler(String value, TextEditingController controller) {
+    controller.text = value;
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(_debounceDuration, _handleSubmission);
+  }
+
+  static final _inputDecoration = InputDecoration(
+    hintText: "0",
+    hintStyle: const TextStyle(color: Color.fromRGBO(0, 0, 0, 0.5)),
+    filled: true,
+    fillColor: Colors.white,
+    border: const OutlineInputBorder(),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+    enabledBorder: OutlineInputBorder(
+      borderSide:
+          const BorderSide(color: Color.fromRGBO(0, 0, 0, 0.5), width: 1),
+      borderRadius: BorderRadius.circular(5.0),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
-    final List<String> inputLabels = [
-      'Original Cake',
-      'Chocolate Cake',
-      'Matcha Cake',
-      'Special Cake'
-    ];
-
-    final List<TextEditingController> textController = [
-      ogController,
-      ccController,
-      mcController,
-      scController
-    ];
-
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double inputWidth = screenWidth / 4 - 46;
-
-    bool sbmtPress() {
-      final isValid = _formkey.currentState!.validate();
-      if (isValid) {
-        _formkey.currentState!.save();
-        widget.formAction(
-          int.parse(ogController.text.trim().isEmpty
-              ? '0'
-              : ogController.text.trim()),
-          int.parse(ccController.text.trim().isEmpty
-              ? '0'
-              : ccController.text.trim()),
-          int.parse(mcController.text.trim().isEmpty
-              ? '0'
-              : mcController.text.trim()),
-          int.parse(scController.text.trim().isEmpty
-              ? '0'
-              : scController.text.trim()),
-          dropdownValue,
-          context,
-        );
-      }
-      return false;
-    }
-
     return Form(
-        key: _formkey,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(4, (index) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                index != 3
-                    ? Text(inputLabels[index], style: TextStyle(fontSize: 16))
-                    : DropdownButton<Map<String, String>>(
-                        value: dropdownValue,
-                        isDense: true,
-                        icon: const Icon(Icons.arrow_drop_down),
-                        elevation: 16,
-                        underline: dropdownValue == null
-                            ? Container(
-                                height: 2,
-                                color: Colors.deepPurpleAccent,
-                              )
-                            : null,
-                        style: const TextStyle(color: Color(0xFF000000)),
-                        onChanged: (Map<String, String>? value) {
-                          setState(() {
-                            dropdownValue = value!;
-                            sbmtPress();
-                          });
-                        },
-                        items: cakeList
-                            .map<DropdownMenuItem<Map<String, String>>>((map) {
-                          return DropdownMenuItem<Map<String, String>>(
-                            value: map,
-                            child: Text(map.keys.first),
-                          );
-                        }).toList(),
-                      ),
-                SizedBox(height: 5),
-                SizedBox(
-                  width: inputWidth,
-                  height: 37,
-                  child: TextFormField(
-                    onChanged: (val) {
-                      if (_debounce?.isActive ?? false) _debounce?.cancel();
-                      _debounce = Timer(_debounceDuration, () {
-                        textController[index].text = val;
-                        sbmtPress();
-                      });
-                    },
-                    controller: textController[index],
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: InputDecoration(
-                      hintText: "0",
-                      hintStyle: TextStyle(color: Color.fromRGBO(0, 0, 0, 0.5)),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: const Color.fromRGBO(0, 0, 0, 0.5),
-                            width: 1),
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                    ),
-                    textAlign: TextAlign.start,
-                  ),
-                ),
-              ],
-            );
-          }),
-        ));
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ..._cakeOptions.map((cake) => _buildInputField(
+                    label: cake['label']!,
+                    controller: _getController(cake['key']!),
+                  )),
+              _buildSpecialCakeDropdown()
+            ],
+          ),
+          const SizedBox(
+            height: 15.0,
+          ),
+          _buildInputField(label: "Madeleine", controller: _madsController),
+        ],
+      ),
+    );
+  }
+
+  TextEditingController _getController(String key) {
+    switch (key) {
+      case 'oCake':
+        return _ogController;
+      case 'cCake':
+        return _ccController;
+      case 'mCake':
+        return _mcController;
+      default:
+        throw Exception('Invalid controller key');
+    }
   }
 }

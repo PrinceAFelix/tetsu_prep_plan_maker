@@ -1,4 +1,5 @@
 import 'package:tetsu_prep_plan_maker/model/cake/cake.dart';
+import 'package:tetsu_prep_plan_maker/model/ingredient/madeleine.dart';
 
 class Ingredients {
   // Properties for each ingredient
@@ -26,16 +27,117 @@ class Ingredients {
         'flour: $flour, sugar: $sugar, eggWhite: $eggWhite, eggYolk: $eggYolk)';
   }
 
-  List<String> toList() {
+  factory Ingredients.fromJson(Map<String, dynamic> json) {
+    return Ingredients(
+      creamCheese: json['creamCheese'] ?? 0,
+      butter: json['butter'] ?? 0,
+      milk: json['milk'] ?? 0,
+      flour: json['flour'] ?? 0,
+      sugar: json['sugar'] ?? 0,
+      eggWhite: json['eggWhite'] ?? 0,
+      eggYolk: json['eggYolk'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'creamCheese': creamCheese,
+      'butter': butter,
+      'milk': milk,
+      'flour': flour,
+      'sugar': sugar,
+      'eggWhite': eggWhite,
+      'eggYolk': eggYolk,
+    };
+  }
+
+  List<String> toList(Madeleine madeleine) {
     return [
-      '${(creamCheese / 1000).toStringAsFixed(1)} Kg',
-      '${((butter / 454) / 25).toStringAsFixed(1)} Box',
-      '${((milk / 1000) / 4).toStringAsFixed(1)} Bag',
-      '${((flour / 1000) / 20).toStringAsFixed(1)} Bag',
-      '${((sugar / 1000) / 20).toStringAsFixed(1)} Bag',
-      '${(eggWhite / 500).round()} Pcs',
-      '${((eggYolk / 1000) / 10).toStringAsFixed(1)} Box',
+      '${(creamCheese / 20000).toStringAsFixed(1)} Box',
+      '${((butter + madeleine.butter) / 11350).toStringAsFixed(1)} Box', // 454 * 25 = 11350
+      '${(milk / 4000).toStringAsFixed(1)} Bag', // 1000 * 4 = 4000
+      '${((flour + madeleine.flour) / 20000).toStringAsFixed(1)} Bag', // 1000 * 20 = 20000
+      '${((sugar + madeleine.sugar) / 20000).toStringAsFixed(1)} Bag', // 1000 * 20 = 20000
+      '${((eggWhite + madeleine.eggWhite) / 500).round()} Pcs',
+      '${((eggYolk + madeleine.eggYolk) / 10000).toStringAsFixed(1)} Box', // 1000 * 10 = 10000
     ];
+  }
+
+  List<String> getCheeseButterSummary() {
+    return [
+      '${(creamCheese / 20000).toStringAsFixed(1)} Box',
+      '${(butter / 11350).toStringAsFixed(1)} Box', // 454 * 25 = 11350]
+    ];
+  }
+
+  List<Map<String, List<int>>> getPrepPlanSummaryList(Cake cakeVal) {
+    List<Map<String, List<int>>> result = [];
+
+    // Standard cakes mapping
+    Map<String, Ingredients Function(int)> standardCakes = {
+      "og": Ingredients.ogCake,
+      "cc": Ingredients.ccCake,
+      "mc": Ingredients.mcCake,
+    };
+
+    // Standard cake calculations
+    Map<String, int> cakeValues = {
+      "og": cakeVal.ogCake,
+      "cc": cakeVal.ccCake,
+      "mc": cakeVal.mtCake,
+    };
+
+    Map<String, List<int>> baseDivisors = {
+      "og": [1100, 500],
+      "cc": [700, 500],
+      "mc": [1000, 200],
+    };
+
+    for (var entry in standardCakes.entries) {
+      int cakeCount = cakeValues[entry.key] ?? 0;
+      if (cakeCount > 0) {
+        Ingredients ingredients = entry.value(cakeCount);
+        result.add({
+          entry.key: [
+            (ingredients.creamCheese / baseDivisors[entry.key]![0]).toInt(),
+            (ingredients.butter / baseDivisors[entry.key]![1]).toInt(),
+          ]
+        });
+      }
+    }
+
+    // Map of special cakes and their corresponding ingredient functions
+    Map<String, Function(int)> specialCakes = {
+      'vbCake': Ingredients.vbCake,
+      'hjCake': Ingredients.hjCake,
+      'hyCake': Ingredients.hyCake,
+      'yzCake': Ingredients.yzCake,
+    };
+
+    // Base divisors for special cakes
+    Map<String, List<int>> specialBaseDivisors = {
+      "vbCake": [940, 250],
+      "hjCake": [857, 200],
+      "hyCake": [940, 400],
+      "yzCake": [1150, 400],
+    };
+
+    // Find the first special cake that has a value > 0
+    for (var entry in specialCakes.entries) {
+      int value = cakeVal.toJson()[entry.key] ?? 0;
+      if (value > 0) {
+        Ingredients ingredients = entry.value(value);
+        result.add({
+          "sc": [
+            (ingredients.creamCheese / specialBaseDivisors[entry.key]![0])
+                .toInt(),
+            (ingredients.butter / specialBaseDivisors[entry.key]![1]).toInt(),
+          ]
+        });
+        return result; // Stop after the first found special cake
+      }
+    }
+    return result;
   }
 
   factory Ingredients.empty() {
@@ -159,7 +261,7 @@ class Ingredients {
 
     // Iterate over the cake types and add the respective Ingredients if the value is non-zero
     for (String cakeType in cakeTypes) {
-      int value = cakeVal.toMap()[cakeType] ?? 0;
+      int value = cakeVal.toJson()[cakeType] ?? 0;
       if (value > 0) {
         // Dynamically call the Ingredients method based on the cakeType
         switch (cakeType) {

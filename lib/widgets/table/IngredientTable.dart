@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:tetsu_prep_plan_maker/model/cake/cake.dart';
 import 'package:tetsu_prep_plan_maker/model/ingredient/Ingredients.dart';
+import 'package:tetsu_prep_plan_maker/model/ingredient/madeleine.dart';
 
 class IngredientTable extends StatefulWidget {
-  const IngredientTable({super.key, required this.cakeVal});
-  final Cake cakeVal;
+  const IngredientTable({super.key, required this.config});
+  final List<Map<String, dynamic>> config;
 
   @override
   State<IngredientTable> createState() => _IngredientTableState();
@@ -23,8 +24,9 @@ class _IngredientTableState extends State<IngredientTable> {
 
   @override
   Widget build(BuildContext context) {
-    Ingredients ingredients = Ingredients.totalRequired(widget.cakeVal);
-
+    Ingredients ingredients =
+        Ingredients.totalRequired(widget.config[0]["cake"]);
+    Madeleine madeleine = Madeleine.totalRequired(widget.config[1]["mads"]);
     return Table(
       columnWidths: const <int, TableColumnWidth>{
         0: FlexColumnWidth(1.5),
@@ -90,16 +92,15 @@ class _IngredientTableState extends State<IngredientTable> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Text(
-                  ingredients.toList()[index - 1] == 0
-                      ? '-'
-                      : ingredients.toList()[index - 1].toString(),
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(244, 180, 103, 1)),
-                )
-              ),
+                  padding: const EdgeInsets.all(15.0),
+                  child: Text(
+                    ingredients.toList(madeleine)[index - 1] == "0"
+                        ? '-'
+                        : ingredients.toList(madeleine)[index - 1].toString(),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromRGBO(244, 180, 103, 1)),
+                  )),
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: Text(

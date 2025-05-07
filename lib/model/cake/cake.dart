@@ -7,14 +7,15 @@ class Cake {
   final int hyCake;
   final int yzCake;
 
-  Cake(
-      {required this.ogCake,
-      required this.ccCake,
-      required this.mtCake,
-      required this.vbCake,
-      required this.hjCake,
-      required this.hyCake,
-      required this.yzCake});
+  Cake({
+    required this.ogCake,
+    required this.ccCake,
+    required this.mtCake,
+    required this.vbCake,
+    required this.hjCake,
+    required this.hyCake,
+    required this.yzCake,
+  });
 
   @override
   String toString() {
@@ -34,7 +35,7 @@ class Cake {
     );
   }
 
-  Map<String, int> toMap() {
+  Map<String, int> toJson() {
     return {
       'ogCake': ogCake,
       'ccCake': ccCake,
@@ -46,16 +47,25 @@ class Cake {
     };
   }
 
+  factory Cake.fromJson(Map<String, dynamic> json) {
+    return Cake(
+      ogCake: json['ogCake'] ?? 0,
+      ccCake: json['ccCake'] ?? 0,
+      mtCake: json['mtCake'] ?? 0,
+      vbCake: json['vbCake'] ?? 0,
+      hjCake: json['hjCake'] ?? 0,
+      hyCake: json['hyCake'] ?? 0,
+      yzCake: json['yzCake'] ?? 0,
+    );
+  }
+
   factory Cake.withFlashcard({
     required int og,
     required int cc,
     required int mt,
     required Map<String?, int?> special,
   }) {
-    // Initialize all values to 0
     int vb = 0, hj = 0, hy = 0, yz = 0;
-
-    // Update the value based on the flashcard
 
     if (special.values.first != null) {
       switch (special.keys.first) {
