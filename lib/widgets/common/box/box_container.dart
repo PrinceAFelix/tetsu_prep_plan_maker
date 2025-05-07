@@ -6,7 +6,7 @@ class BoxContainer extends StatelessWidget {
       required this.backgroundColor,
       required this.boXTitle,
       required this.boxWidth,
-       this.boxHeight,
+      this.boxHeight,
       required this.child});
   final Color backgroundColor;
   final String boXTitle;
