@@ -9,7 +9,7 @@ class BoxSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     return Container(
-      width: screenWidth / 3 - 50,
+      width: screenWidth / 2 - 50,
       height: 90.0,
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(

@@ -13,27 +13,34 @@ class _BoxTodoState extends State<BoxTodo> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        color: const Color(0xFFFFCF9C),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Checkbox(
-              value: isComplete, // Boolean state variable
-              onChanged: (bool? value) {
-                setState(() {
-                  isComplete = !isComplete;
-                });
-              },
-            ),
-            Text(
+      color: const Color(0xFFFFCF9C),
+      padding: const EdgeInsets.all(8.0), // Add some padding for spacing
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start, // Align items at the top
+        children: [
+          Checkbox(
+            value: isComplete, // Boolean state variable
+            onChanged: (bool? value) {
+              setState(() {
+                isComplete = !isComplete;
+              });
+            },
+          ),
+          Expanded(
+            // Ensures text wraps instead of overflowing
+            child: Text(
               widget.todoTitle,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: Colors.black87,
               ),
+              softWrap: true, // Allow text to wrap
+              overflow: TextOverflow.visible, // Prevent text from being cut off
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }
