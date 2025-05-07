@@ -1,6 +1,6 @@
 name: tetsu_prep_plan_maker
-description: "A new Flutter project."
-publish_to: 'none'
+description: "App to make prep plan"
+publish_to: "none"
 version: 0.1.0
 
 environment:
@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.3
+  intl: ^0.20.2
+  shared_preferences: ^2.5.2
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +20,11 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/prep_plan.png" # Your icon path
+  adaptive_icon_background: "#FFFFFF" # Optional for Android adaptive icons
+  adaptive_icon_foreground: "assets/prep_plan.png" # Optional for adaptive icons
+  remove_alpha_ios: true

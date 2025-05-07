@@ -5,19 +5,19 @@ class BoxContainer extends StatelessWidget {
       {super.key,
       required this.backgroundColor,
       required this.boXTitle,
-      required this.boxWdith,
-      required this.boxHeight,
+      required this.boxWidth,
+      this.boxHeight,
       required this.child});
   final Color backgroundColor;
   final String boXTitle;
-  final double boxWdith;
-  final double boxHeight;
+  final double boxWidth;
+  final double? boxHeight;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: boxWdith,
+      width: boxWidth,
       height: boxHeight,
       decoration: BoxDecoration(
           color: backgroundColor,
@@ -37,6 +37,9 @@ class BoxContainer extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
+            ),
+            SizedBox(
+              height: 35,
             ),
             child
           ],
